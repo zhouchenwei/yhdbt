@@ -47,53 +47,13 @@ bool CTcpConnect::ConnectServer(const string& ip, unsigned short port)
 
 bool CTcpConnect::SendQuery(pair<int, string> msg)
 {
-	unique_lock<mutex> lk(_muxSend);
-	int cmd = msg.first;
-	string content = msg.second;
-	int dateLen = content.length();
-	int flag = comm_flag;
-	string sendText = string((char*)&flag, 4) + string((char*)&cmd, 4) + string((char*)&dateLen, 4) + content;
-	size_t len = 0;
-	while (len < sendText.length()) {
-		int n = send(_sock, sendText.c_str() + len, sendText.length() - len, 0);
-		if (n <= 0) {
-			GameError();
-			return false;
-		}
-		len += n;
-	}
+	
 	return true;
 }
 
 bool CTcpConnect::RecvQuery(string& content)
 {
-	char buf[8] = { 0 };
-	int recvlen = 0;
-	while (recvlen < 8){
-		int n = recv(_sock, buf+recvlen, 8-recvlen, 0);
-		if (n <= 0) {
-			GameError();
-			return false;
-		}
-		recvlen += n;
-	}
-	int flag = *((int*)buf);
-	int len = *((int*)(buf+4));
-	if (flag != comm_flag || len < 0 || len > 5000) {
-		GameError();
-		return false;
-	}
 
-	recvlen = 0;
-	content.resize(len);
-	while (recvlen < len) {
-		int n = recv(_sock, (char*)(content.c_str() + recvlen), len - recvlen, 0);
-		if (n <= 0) {
-			GameError();
-			return false;
-		}
-		recvlen += n;
-	}
 	return true;
 }
 
